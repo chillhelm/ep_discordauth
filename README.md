@@ -1,5 +1,5 @@
-ep_base
-=======
+ep_discordauth
+==============
 
 A plugin that allows you to authenticate users based on their Discord user id or
 their membership in guilds (servers) and roles in those guilds.
