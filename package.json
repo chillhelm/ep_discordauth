@@ -1,6 +1,6 @@
 {
 	"name": "ep_discordauth",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "A plugin to enable authentication with discord oauth and authorization based on guilds and roles.",
 	"author": {
 		"name":"chillhelm (Wilhelm Neubert)",
