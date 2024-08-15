@@ -1,0 +1,14 @@
+{
+    "parts": [
+        {
+            "name": "discordauth",
+            "hooks": {
+                "expressCreateServer" : "ep_discordauth/index:expressCreateServer",
+                "authenticate" : "ep_discordauth/index:authenticate",
+                "authnFailure" : "ep_discordauth/index:authnFailure",
+                "authorize" : "ep_discordauth/index:authorize",
+                "preAuthorize": "ep_discordauth/index:preAuthorize"
+            }
+        }
+    ]
+}

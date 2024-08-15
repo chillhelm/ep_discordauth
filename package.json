@@ -1,0 +1,27 @@
+{
+	"name": "ep_discordauth",
+	"version": "0.0.2",
+	"description": "A plugin to enable authentication with discord oauth and authorization based on guilds and roles.",
+	"author": {
+		"name":"chillhelm (Wilhelm Neubert)",
+		"email":"wilhelm@neubert.online"
+	},
+	"keywords": [
+		"etherpad",
+		"plugin",
+		"ep"
+	],
+	"license": "Apache2" ,
+
+	"dependencies": {
+		"undici":">=6.6.1",
+		"cookie-parser":">=1.4.6",
+		"express-session":"",
+		"express":""
+	},
+	"peerDependencies": {
+		"ep_etherpad-lite":">=2.2.1"
+	},
+	"engines": { "node": ">= 10.13.0"}
+}
+
