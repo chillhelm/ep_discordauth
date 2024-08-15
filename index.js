@@ -71,41 +71,74 @@ exports.expressCreateServer = function(hook, context){
                     let permission = false;
                     let admin = false;
                     let individualAuthorizedUsers = pluginSettings.authorizedUsers.individuals;
-                    if(individualAuthorizedUsers && individualAuthorizedUsers.forEach) {
-                        for (authId of individualAuthorizedUsers) {
-                            if(authId == userData.id)
-                                permission = true;
-                        }
+                    if(individualAuthorizedUsers
+                        && individualAuthorizedUsers.some(id => id==userData.id)) {
+                        permission = true;
                     }
                     if (guildList) {
                         for(guild of guildList) {
-                            if (pluginSettings.authorizedUsers && pluginSettings.authorizedUsers.guilds && pluginSettings.authorizedUsers.guilds[guild.id]) {
+                            if (pluginSettings.authorizedUsers && pluginSettings.authorizedUsers.guilds && pluginSettings.authorizedUsers.guilds[guild.id] && pluginSettings.authorizedUsers.guilds[guild.id].roles) {
                                 const guildRoleResult = await request(`https://discord.com/api/users/@me/guilds/${guild.id}/member`,{
                                     headers: {
                                         authorization: `${oauthData.token_type} ${oauthData.access_token}`,
                                     },
                                 });
                                 const guildRoles = await guildRoleResult.body.json();
-                                console.log("ep_discordauth guildRoles.roles",guildRoles.roles);
-                                const authorizedRoleSet = new Set(pluginSettings.authorizedUsers.guilds[guild.id]);
+                                const authorizedRoleSet = new Set(pluginSettings.authorizedUsers.guilds[guild.id].roles);
                                 const userRoleSet = new Set(guildRoles.roles);
                                 if([...userRoleSet].some(role=>authorizedRoleSet.has(role))) {
                                     permission = true;
-                                    console.log("based on role, permission was granted");
                                 }
                             }
                         }
                     }
-                    if(permission) {
-                        console.log("ep_discordauth Der hat die Etherpadnutzer erlaubnis!");
-                    } else {
-                        console.log("ep_discordauth Der hat nicht die Etherpadnutzer erlaubnis!");
-                    }
-                    if(pluginSettings.authorizedUsers
-                        && pluginSettings.authorizedUsers.individuals
-                        && pluginSettings.authorizedUsers.individuals.some(id => id==userData.id)) {
-                        console.log("ep_discordauth granted for individual by user id");
+                    let individualAdminUsers = pluginSettings.admins.individuals;
+                    if (individualAdminUsers
+                        && individualAdminUsers.some(id => id==userData.id)) {
                         permission = true;
+                        admin = true;
+                    }
+                    if (guildList) {
+                        for(guild of guildList) {
+                            if (pluginSettings.admins && pluginSettings.admins.guilds && pluginSettings.admins.guilds[guild.id] && pluginSettings.admins.guilds[guild.id].roles) {
+                                const guildRoleResult = await request(`https://discord.com/api/users/@me/guilds/${guild.id}/member`,{
+                                    headers: {
+                                        authorization: `${oauthData.token_type} ${oauthData.access_token}`,
+                                    },
+                                });
+                                const guildRoles = await guildRoleResult.body.json();
+                                const authorizedRoleSet = new Set(pluginSettings.admins.guilds[guild.id].roles);
+                                const userRoleSet = new Set(guildRoles.roles);
+                                if([...userRoleSet].some(role=>authorizedRoleSet.has(role))) {
+                                    permission = true;
+                                    admin = true;
+                                }
+                            }
+                        }
+                    }
+                    let individualBannedUsers = pluginSettings.excluded.individuals;
+                    if (individualBannedUsers
+                        && individualBannedUsers.some(id => id==userData.id)) {
+                        permission = false;
+                        admin = false;
+                    }
+                    if (guildList) {
+                        for(guild of guildList) {
+                            if (pluginSettings.excluded && pluginSettings.excluded.guilds && pluginSettings.excluded.guilds[guild.id] && pluginSettings.excluded.guilds[guild.id].roles) {
+                                const guildRoleResult = await request(`https://discord.com/api/users/@me/guilds/${guild.id}/member`,{
+                                    headers: {
+                                        authorization: `${oauthData.token_type} ${oauthData.access_token}`,
+                                    },
+                                });
+                                const guildRoles = await guildRoleResult.body.json();
+                                const authorizedRoleSet = new Set(pluginSettings.excluded.guilds[guild.id].roles);
+                                const userRoleSet = new Set(guildRoles.roles);
+                                if([...userRoleSet].some(role=>authorizedRoleSet.has(role))) {
+                                    permission = false;
+                                    admin = false;
+                                }
+                            }
+                        }
                     }
                     if(userData.username && userData.discriminator && userData.id && (permission||admin)) {
                         console.log(`ep_discordauth Database Write -> oauth:${sessionID}`, '---', userData);
