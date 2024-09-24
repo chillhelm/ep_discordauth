@@ -4,7 +4,7 @@
 	"description": "A plugin to enable authentication with discord oauth and authorization based on guilds and roles.",
 	"author": {
 		"name":"chillhelm (Wilhelm Neubert)",
-		"email":"wilhelm@neubert.online"
+		"email":"neubert.wilhelm@googlemail.com"
 	},
 	"keywords": [
 		"etherpad",
@@ -19,6 +19,10 @@
 		"express-session":"",
 		"express":""
 	},
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/chillhelm/ep_discordauth.git"
+    },
 	"peerDependencies": {
 		"ep_etherpad-lite":">=2.2.1"
 	},

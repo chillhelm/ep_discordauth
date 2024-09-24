@@ -23,7 +23,6 @@ express_session_secret = makesecret(16);
 const oneDay = 1000 * 60 * 60 * 24;
 
 exports.expressCreateServer = function(hook, context){
-    console.log("ep_discordauth called index.js:expressCreateServer");
     context.app.get("/discordauth/callback", async (req, res) => {
 	    let auth_code = req.query.code;
         let sessionID = req.sessionID;
@@ -34,8 +33,6 @@ exports.expressCreateServer = function(hook, context){
                 res.redirect("/discordauth/logout");
             } else {
                 if(auth_code) {
-                    console.log(`Client ID: ${pluginSettings.client_id}
-                        Client Secret: ${pluginSettings.client_secret} `);
                     const tokenResponseData = await request('https://discord.com/api/oauth2/token', {
                         method: 'POST',
                         body: new URLSearchParams({
@@ -51,7 +48,6 @@ exports.expressCreateServer = function(hook, context){
                         }
                     });
                     const oauthData = await tokenResponseData.body.json();
-                    console.log("ep_discordauth oauthData:", oauthData);
                     const userResult = await request('https://discord.com/api/users/@me', {
                     headers: {
                         authorization: `${oauthData.token_type} ${oauthData.access_token}`,
@@ -154,7 +150,6 @@ exports.expressCreateServer = function(hook, context){
     });
     context.app.get("/discordauth/login", async (req, res) => {
         let sessionID = req.sessionID;
-        console.log("ep_discordauth req.session",req.session);
         req.session.state=makesecret(16)
         let callbackUrl = `${req.protocol}://${req.get('host')}/discordauth/callback`
         db.set(`oauthstate:${req.sessionID}`, req.session.state);
@@ -178,18 +173,15 @@ exports.expressCreateServer = function(hook, context){
 }
 
 exports.authenticate = function(hook, context, cb) {
-    console.log("ep_discordauth called index.js:authenticate");
     let userIsAuthedAlready = false;
-    console.log(`ep_discordauth Database lookup -> oauth:${context.req.sessionID}`);
     db.get(`oauth:${context.req.sessionID}`, (k, user) => {
         console.log(`ep_discordauth Oauth session found ->${context.req.sessionID}`, 'has user data of ', user);
         if (user) {
             userIsAuthedAlready = true;
-            console.log(user);
             context.req.session.user = context.users[user.username] || user;
-            console.log("context user", context.req.session.user)
+            context.req.session.user.displayname = user.username;
+            context.req.session.user.displaynameChangeable = true;
             db.get(`oauth_admin:${context.req.sessionID}`, (k, admin) => {
-                console.log("der ist admin", admin);
                 context.req.session.user.is_admin = admin;
             });
             cb(true);
@@ -206,18 +198,14 @@ exports.authnFailure = function(hook, context, cb) {
 }
 
 exports.preAuthorize = async function(hook, context) {
-    console.log("ep_discordauth preAuthorize",context.req.url)
     if(context.req.url.indexOf("/discordauth/callback")===0) return true;
     if(context.req.url.indexOf("/discordauth/login")===0) return true;
     if(context.req.url.indexOf("/discordauth/logout")===0) return true;
 }
 
 exports.authorize = function(hook, context, cb){
-    console.log("ep_discordauth called index.js:authorize");
     let userIsAuthedAlready = false;
-    console.log(`ep_discordauth Database lookup -> oauth:${context.req.sessionID}`);
     db.get(`oauth:${context.req.sessionID}`, (k, user) => {
-        console.log(`ep_discordauth Oauth session found ->${context.req.sessionID}`, 'has user data of ', user);
         if (user) userIsAuthedAlready = true;
         cb(userIsAuthedAlready);
     });
